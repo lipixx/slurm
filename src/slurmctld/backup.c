@@ -487,8 +487,8 @@ static void *_ping_ctld_thread(void *arg)
 }
 
 /*
- * Ping ControlMachine and all LOWER BackupController nodes
- * RET SLURM_SUCCESS or error code
+ * Ping ControlMachine and all BackupController nodes
+ * RET SLURM_SUCCESS if a currently active controller is found
  */
 static int _ping_controller(void)
 {

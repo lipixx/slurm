@@ -899,13 +899,15 @@ typedef struct set_fs_dampening_factor_msg {
 	uint16_t dampening_factor;
 } set_fs_dampening_factor_msg_t;
 
-/* Note: We include the node list here for reliable cleanup on XCPU systems.
+/*
+ * Note: We include the node list here for reliable cleanup on XCPU systems.
  *
  * Note: We include select_jobinfo here in addition to the job launch
  * RPC in order to ensure reliable clean-up of a BlueGene partition in
  * the event of some launch failure or race condition preventing slurmd
  * from getting the MPIRUN_PARTITION at that time. It is needed for
- * the job epilog. */
+ * the job epilog.
+ */
 
 #define SIG_OOM		253	/* Dummy signal value for out of memory
 				 * (OOM) notification. Exist status reported as

@@ -511,10 +511,11 @@ int main(int argc, char **argv)
 
 			if (recover == 0) {
 				slurmctld_init_db = 1;
-				/* This needs to be set up the nodes
-				   going down and this happens before it is
-				   normally set up so do it now.
-				*/
+				/*
+				 * This needs to be set up the nodes
+				 * going down and this happens before it is
+				 * normally set up so do it now.
+				 */
 				set_cluster_tres(false);
 				_accounting_mark_all_nodes_down("cold-start");
 			}
@@ -528,10 +529,12 @@ int main(int argc, char **argv)
 			acct_db_conn = acct_storage_g_get_connection(
 						&callbacks, 0, false,
 						slurmctld_conf.cluster_name);
-			/* We only send in a variable the first time
+			/*
+			 * We only send in a variable the first time
 			 * we call this since we are setting up static
 			 * variables inside the function sending a
-			 * NULL will just use those set before. */
+			 * NULL will just use those set before.
+			 */
 			if (assoc_mgr_init(acct_db_conn, NULL, errno) &&
 			    (accounting_enforce & ACCOUNTING_ENFORCE_ASSOCS) &&
 			    !running_cache) {
@@ -554,8 +557,10 @@ int main(int argc, char **argv)
 			slurmctld_conf.slurmctld_port);
 		_accounting_cluster_ready();
 
-		/* call after registering so that the current cluster's
-		 * control_host and control_port will be filled in. */
+		/*
+		 * call after registering so that the current cluster's
+		 * control_host and control_port will be filled in.
+		 */
 		fed_mgr_init(acct_db_conn);
 
 		if (slurm_priority_init() != SLURM_SUCCESS)
