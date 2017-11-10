@@ -261,6 +261,8 @@ typedef enum {
 	RESPONSE_FED_INFO,		/* 2050 */
 	REQUEST_BATCH_SCRIPT,
 	RESPONSE_BATCH_SCRIPT,
+	REQUEST_CONTROL_STATUS,
+	RESPONSE_CONTROL_STATUS,
 
 	REQUEST_UPDATE_JOB = 3001,
 	REQUEST_UPDATE_NODE,
@@ -899,6 +901,12 @@ typedef struct set_fs_dampening_factor_msg {
 	uint16_t dampening_factor;
 } set_fs_dampening_factor_msg_t;
 
+typedef struct control_status_msg {
+	uint16_t backup_inx;	/* Our BackupController# index,
+				 * between 0 and (MAX_CONTROLLERS-1) */
+	time_t control_time;	/* Time we became primary slurmctld (or 0) */
+} control_status_msg_t;
+
 /*
  * Note: We include the node list here for reliable cleanup on XCPU systems.
  *
@@ -1465,6 +1473,7 @@ extern void slurm_free_network_callerid_msg(network_callerid_msg_t *mesg);
 extern void slurm_free_network_callerid_resp(network_callerid_resp_t *resp);
 extern void slurm_free_set_fs_dampening_factor_msg(
 	set_fs_dampening_factor_msg_t *msg);
+extern void slurm_free_control_status_msg(control_status_msg_t *msg);
 
 extern const char *preempt_mode_string(uint16_t preempt_mode);
 extern uint16_t preempt_mode_num(const char *preempt_mode);

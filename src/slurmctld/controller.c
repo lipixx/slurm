@@ -166,9 +166,11 @@ log_options_t sched_log_opts = SCHEDLOG_OPTS_INITIALIZER;
 int	accounting_enforce = 0;
 int	association_based_accounting = 0;
 void *	acct_db_conn = NULL;
+int	backup_inx;
 int	batch_sched_delay = 3;
 int	bg_recover = DEFAULT_RECOVER;
 uint32_t cluster_cpus = 0;
+time_t	control_time = 0;
 time_t	last_proc_req_start = 0;
 bool	ping_nodes_now = false;
 pthread_cond_t purge_thread_cond = PTHREAD_COND_INITIALIZER;
@@ -263,7 +265,7 @@ int main(int argc, char **argv)
 	slurmctld_lock_t config_write_lock = {
 		WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, NO_LOCK };
 	slurm_trigger_callbacks_t callbacks;
-	bool create_clustername_file, is_backup = false;
+	bool create_clustername_file;
 
 	/*
 	 * Make sure we have no extra open files which
@@ -423,16 +425,17 @@ int main(int argc, char **argv)
 		slurmctld_config.send_groups_in_cred = false;
 
 	/* Must set before plugins are loaded. */
+	backup_inx = 0;
 	for (i = 1; i < slurmctld_conf.control_cnt; i++) {
 		if (!xstrcmp(node_name_short,
 			     slurmctld_conf.control_machine[i]) ||
 		    !xstrcmp(node_name_long,
 			     slurmctld_conf.control_machine[i])) {
-			is_backup = true;
+			backup_inx = i;
 			break;
 		}
 	}
-	if (is_backup) {
+	if (backup_inx > 0) {
 		slurmctld_primary = 0;
 
 #ifdef HAVE_ALPS_CRAY
@@ -546,6 +549,7 @@ int main(int argc, char **argv)
 		}
 
 		info("Running as primary controller");
+		control_time = time(NULL);
 		heartbeat_start();
 		if ((slurmctld_config.resume_backup == false) &&
 		    (slurmctld_primary == 1)) {

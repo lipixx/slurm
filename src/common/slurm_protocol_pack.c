@@ -780,6 +780,11 @@ static void _pack_set_fs_dampening_factor_msg(
 	set_fs_dampening_factor_msg_t * msg,
 	Buf buffer, uint16_t protocol_version);
 
+static void _pack_control_status_msg(control_status_msg_t *msg,
+	Buf buffer, uint16_t protocol_version);
+static int _unpack_control_status_msg(control_status_msg_t **msg_ptr,
+	Buf buffer, uint16_t protocol_version);
+
 /* pack_header
  * packs a slurm protocol header that precedes every slurm message
  * IN header - the header structure to pack
@@ -995,6 +1000,7 @@ pack_msg(slurm_msg_t const *msg, Buf buffer)
 	case REQUEST_SHUTDOWN_IMMEDIATE:
 	case REQUEST_PING:
 	case REQUEST_CONTROL:
+	case REQUEST_CONTROL_STATUS:
 	case REQUEST_TAKEOVER:
 	case REQUEST_DAEMON_STATUS:
 	case REQUEST_HEALTH_CHECK:
@@ -1555,6 +1561,9 @@ pack_msg(slurm_msg_t const *msg, Buf buffer)
 			(set_fs_dampening_factor_msg_t *)msg->data, buffer,
 			msg->protocol_version);
 		break;
+	case RESPONSE_CONTROL_STATUS:
+		_pack_control_status_msg((control_status_msg_t *)(msg->data),
+			buffer, msg->protocol_version);
 	default:
 		debug("No pack method for msg type %u", msg->msg_type);
 		return EINVAL;
@@ -1691,6 +1700,7 @@ unpack_msg(slurm_msg_t * msg, Buf buffer)
 	case REQUEST_SHUTDOWN_IMMEDIATE:
 	case REQUEST_PING:
 	case REQUEST_CONTROL:
+	case REQUEST_CONTROL_STATUS:
 	case REQUEST_TAKEOVER:
 	case REQUEST_DAEMON_STATUS:
 	case REQUEST_HEALTH_CHECK:
@@ -2305,6 +2315,11 @@ unpack_msg(slurm_msg_t * msg, Buf buffer)
 	case REQUEST_SET_FS_DAMPENING_FACTOR:
 		rc = _unpack_set_fs_dampening_factor_msg(
 			(set_fs_dampening_factor_msg_t **)&(msg->data), buffer,
+			msg->protocol_version);
+		break;
+	case RESPONSE_CONTROL_STATUS:
+		rc = _unpack_control_status_msg(
+			(control_status_msg_t **)&(msg->data), buffer,
 			msg->protocol_version);
 		break;
 	default:
@@ -13844,6 +13859,35 @@ static int _unpack_set_fs_dampening_factor_msg(
 
 unpack_error:
 	slurm_free_set_fs_dampening_factor_msg(msg);
+	*msg_ptr = NULL;
+	return SLURM_ERROR;
+}
+
+static void _pack_control_status_msg(control_status_msg_t *msg,
+	Buf buffer, uint16_t protocol_version)
+{
+	if (protocol_version >= SLURM_18_08_PROTOCOL_VERSION) {
+		pack16(msg->backup_inx, buffer);
+		pack_time(msg->control_time, buffer);
+	}
+}
+
+static int _unpack_control_status_msg(control_status_msg_t **msg_ptr,
+	Buf buffer, uint16_t protocol_version)
+{
+	control_status_msg_t *msg;
+
+	msg = xmalloc(sizeof(control_status_msg_t));
+	*msg_ptr = msg;
+	if (protocol_version >= SLURM_18_08_PROTOCOL_VERSION) {
+		safe_unpack16(&msg->backup_inx, buffer);
+		safe_unpack_time(&msg->control_time, buffer);
+	}
+
+	return SLURM_SUCCESS;
+
+unpack_error:
+	slurm_free_control_status_msg(msg);
 	*msg_ptr = NULL;
 	return SLURM_ERROR;
 }

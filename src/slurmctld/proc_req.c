@@ -140,6 +140,7 @@ inline static void  _slurm_rpc_burst_buffer_info(slurm_msg_t * msg);
 inline static void  _slurm_rpc_checkpoint(slurm_msg_t * msg);
 inline static void  _slurm_rpc_checkpoint_comp(slurm_msg_t * msg);
 inline static void  _slurm_rpc_checkpoint_task_comp(slurm_msg_t * msg);
+inline static void  _slurm_rpc_control_status(slurm_msg_t * msg);
 inline static void  _slurm_rpc_delete_partition(slurm_msg_t * msg);
 inline static void  _slurm_rpc_complete_job_allocation(slurm_msg_t * msg);
 inline static void  _slurm_rpc_complete_batch_script(slurm_msg_t * msg,
@@ -594,6 +595,9 @@ void slurmctld_req(slurm_msg_t *msg, connection_arg_t *arg)
 		break;
 	case REQUEST_SET_FS_DAMPENING_FACTOR:
 		_slurm_rpc_set_fs_dampening_factor(msg);
+		break;
+	case REQUEST_CONTROL_STATUS:
+		_slurm_rpc_control_status(msg);
 		break;
 	default:
 		error("invalid RPC msg_type=%u", msg->msg_type);
@@ -6285,6 +6289,23 @@ static void _pack_rpc_stats(int resp, char **buffer_ptr, int *buffer_size,
 
 	*buffer_size = get_buf_offset(buffer);
 	buffer_ptr[0] = xfer_buf_data(buffer);
+}
+
+inline static void _slurm_rpc_control_status(slurm_msg_t * msg)
+{
+	slurm_msg_t response_msg;
+	control_status_msg_t data;
+
+	slurm_msg_t_init(&response_msg);
+	response_msg.protocol_version = msg->protocol_version;
+	response_msg.address = msg->address;
+	response_msg.conn = msg->conn;
+	response_msg.msg_type = RESPONSE_STATS_INFO;
+	response_msg.data = &data;
+	response_msg.data_size = sizeof(control_status_msg_t);
+	data.backup_inx = backup_inx;
+	data.control_time = control_time;
+	slurm_send_node_msg(msg->conn_fd, &response_msg);
 }
 
 /* _slurm_rpc_dump_stats - process RPC for statistics information */
