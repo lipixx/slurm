@@ -183,20 +183,24 @@ void run_backup(slurm_trigger_callbacks_t *callbacks)
 			break;
 		} else {
 			time_t use_time, last_heartbeat;
-//FIXME-BACKUP: Modify file to include backup_inx
-			last_heartbeat = get_last_heartbeat();
-			debug("%s: last_heartbeat %ld", __func__,
-			      last_heartbeat);
+			int server_inx = -1;
+			last_heartbeat = get_last_heartbeat(&server_inx);
+			debug("%s: last_heartbeat %ld from server %d",
+			      __func__, last_heartbeat, server_inx);
 
-			if (last_heartbeat > last_controller_response) {
-				error("Last message to the controller was at %ld,"
-				      " but the last heartbeat was written at %ld,"
-				      " trusting the filesystem instead of the network"
-				      " and not asserting control at this time.",
-				      last_controller_response, last_heartbeat);
+			use_time = last_controller_response;
+			if (server_inx > backup_inx) {
+				info("Lower priority slurmctld is currently primary (%d > %d)",
+				     server_inx, backup_inx);
+			} else if (last_heartbeat > last_controller_response) {
+				/* Race condition for close times */
+				info("Last message to the controller was at %ld,"
+				     " but the last heartbeat was written at %ld,"
+				     " trusting the filesystem instead of the network"
+				     " and not asserting control at this time.",
+				     last_controller_response, last_heartbeat);
 				use_time = last_heartbeat;
-			} else
-				use_time = last_controller_response;
+			}
 
 			if ((time(NULL) - use_time) >
 			    slurmctld_conf.slurmctld_timeout)
