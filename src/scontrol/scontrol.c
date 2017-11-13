@@ -553,7 +553,7 @@ _ping_slurmctld(uint32_t control_cnt, char **control_machine)
 
 	for (i = 0; i < control_cnt; i++) {
 		int status = 0;
-		if (slurm_ping(i + 1) == SLURM_SUCCESS)
+		if (slurm_ping(i) == SLURM_SUCCESS)
 			status = 1;
 		else
 			down_msg = true;

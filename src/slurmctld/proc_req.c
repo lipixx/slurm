@@ -6300,7 +6300,7 @@ inline static void _slurm_rpc_control_status(slurm_msg_t * msg)
 	response_msg.protocol_version = msg->protocol_version;
 	response_msg.address = msg->address;
 	response_msg.conn = msg->conn;
-	response_msg.msg_type = RESPONSE_STATS_INFO;
+	response_msg.msg_type = RESPONSE_CONTROL_STATUS;
 	response_msg.data = &data;
 	response_msg.data_size = sizeof(control_status_msg_t);
 	data.backup_inx = backup_inx;

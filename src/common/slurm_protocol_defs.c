@@ -4439,6 +4439,7 @@ extern int slurm_free_msg_data(slurm_msg_type_t type, void *data)
 		break;
 	case RESPONSE_CONTROL_STATUS:
 		slurm_free_control_status_msg(data);
+		break;
 	default:
 		error("invalid type trying to be freed %u", type);
 		break;
