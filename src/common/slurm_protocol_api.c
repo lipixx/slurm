@@ -3065,8 +3065,8 @@ extern int slurm_open_controller_conn(slurm_addr_t *addr, bool *use_backup,
 			}
 			if ((backup_cnt > 0) || *use_backup) {
 				for (i = 1; i <= backup_cnt; i++) {
-				fd = slurm_open_msg_conn(&myproto->
-							 controller_addr[i]);
+					fd = slurm_open_msg_conn(&myproto->
+							controller_addr[i]);
 					if (fd >= 0) {
 						debug("Contacted secondary controller");
 						*use_backup = true;
