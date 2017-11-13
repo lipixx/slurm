@@ -489,21 +489,22 @@ int main(int argc, char **argv)
 		if (!slurmctld_primary) {
 			slurm_sched_fini();	/* make sure shutdown */
 			run_backup(&callbacks);
-			if (slurm_acct_storage_init(NULL) != SLURM_SUCCESS )
+			(void) _shutdown_backup_controller(SHUTDOWN_WAIT);
+			if (slurm_acct_storage_init(NULL) != SLURM_SUCCESS)
 				fatal("failed to initialize "
 				      "accounting_storage plugin");
 		} else if (_valid_controller()) {
 			(void) _shutdown_backup_controller(SHUTDOWN_WAIT);
 			trigger_primary_ctld_res_ctrl();
 			ctld_assoc_mgr_init(&callbacks);
-			if (slurm_acct_storage_init(NULL) != SLURM_SUCCESS )
+			if (slurm_acct_storage_init(NULL) != SLURM_SUCCESS)
 				fatal("failed to initialize "
 				      "accounting_storage plugin");
 			/* Now recover the remaining state information */
 			lock_slurmctld(config_write_lock);
 			if (switch_g_restore(slurmctld_conf.state_save_location,
 					   recover ? true : false))
-				fatal(" failed to initialize switch plugin" );
+				fatal(" failed to initialize switch plugin");
 			if ((error_code = read_slurm_conf(recover, false))) {
 				fatal("read_slurm_conf reading %s: %s",
 					slurmctld_conf.slurm_conf,

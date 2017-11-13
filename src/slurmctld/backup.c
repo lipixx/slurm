@@ -193,12 +193,12 @@ void run_backup(slurm_trigger_callbacks_t *callbacks)
 				info("Lower priority slurmctld is currently primary (%d > %d)",
 				     server_inx, backup_inx);
 			} else if (last_heartbeat > last_controller_response) {
-				/* Race condition for close times */
-				info("Last message to the controller was at %ld,"
-				     " but the last heartbeat was written at %ld,"
-				     " trusting the filesystem instead of the network"
-				     " and not asserting control at this time.",
-				     last_controller_response, last_heartbeat);
+				/* Race condition for time stamps */
+				debug("Last message to the controller was at %ld,"
+				      " but the last heartbeat was written at %ld,"
+				      " trusting the filesystem instead of the network"
+				      " and not asserting control at this time.",
+				      last_controller_response, last_heartbeat);
 				use_time = last_heartbeat;
 			}
 
@@ -229,8 +229,8 @@ void run_backup(slurm_trigger_callbacks_t *callbacks)
 	}
 
 	lock_slurmctld(config_read_lock);
-	error("ControlMachine %s not responding, BackupController %s taking over",
-	      slurmctld_conf.control_machine[0], node_name_short);
+	error("ControlMachine %s not responding, BackupController%d %s taking over",
+	      slurmctld_conf.control_machine[0], backup_inx, node_name_short);
 	unlock_slurmctld(config_read_lock);
 
 	backup_slurmctld_restart();

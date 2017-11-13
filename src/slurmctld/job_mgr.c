@@ -683,9 +683,11 @@ int dump_all_job_state(void)
 	DEF_TIMERS;
 
 	START_TIMER;
-	/* Check that last state file was written at expected time.
+	/*
+	 * Check that last state file was written at expected time.
 	 * This is a check for two slurmctld daemons running at the same
-	 * time in primary mode (a split-brain problem). */
+	 * time in primary mode (a split-brain problem).
+	 */
 	last_state_file_time = _get_last_job_state_write_time();
 	if (last_file_write_time && last_state_file_time &&
 	    (last_file_write_time != last_state_file_time)) {
